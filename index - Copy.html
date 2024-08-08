@@ -1,0 +1,255 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuckaroo - Swear Word Game</title>
+    <style>
+        body {
+            background-color: #1E90FF;
+            font-family: Arial, sans-serif;
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+        }
+        .game-container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            flex-grow: 2;
+            margin: 0 20px;
+        }
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .list {
+            width: 25%;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            height: 300px;
+        }
+        input {
+            padding: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            text-align: center;
+            width: 80%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #FF4500;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #FF6347;
+        }
+        .score {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .timer {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .message {
+            font-size: 20px;
+            color: #FFD700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="title">Fuckaroo</div>
+
+<div class="container">
+    <!-- Swear Words List -->
+    <div class="list">
+        <h3>Allowed Swear Words</h3>
+        <ul id="swearList">
+            <!-- List items will be populated by JavaScript -->
+        </ul>
+    </div>
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <div class="score">Score: <span id="score">0</span></div>
+        <div class="timer">Time left: <span id="timer">10</span> seconds</div>
+        <input type="text" id="swearInput" placeholder="Type a swear word..." autocomplete="off">
+        <button id="resetButton" onclick="resetGame()">Reset</button>
+        <div id="message" class="message"></div>
+    </div>
+</div>
+
+<script>
+    const commonSwearWords = [
+        "fuck", "shit", "ass", "bitch", "bastard", 
+        "damn", "crap", "piss", "dick", "cock", 
+        "pussy", "cunt", "bollocks", "bugger", "bloody",
+        "wanker", "twat", "arse", "prick", "slut",
+        "whore", "douche", "fucker", "motherfucker", "bastard",
+        "bullshit", "dumbass", "jackass", "shithead", "asshole",
+        "bitching", "fuckhead", "dipshit", "dickhead", "butthole",
+        "shitbag", "wank", "turd", "fudge", "crud",
+        "jerk", "darn", "heck", "frick", "dang",
+        "freak", "lame", "punk", "scumbag", "bozo",
+        "buffoon", "nincompoop", "douchebag", "goddamn", "hell",
+        "blimey", "bollocks", "sod", "git", "berk",
+        "pillock", "twit", "shag", "bugger", "minger",
+        "smeghead", "pissflaps", "tosser", "bellend", "knob",
+        "shite", "knobhead", "prat", "git", "arsehole",
+        "numpty", "gormless", "plonker", "muppet", "wally",
+        "prat", "git", "berk", "pillock", "nutter",
+        "rubbish", "piffle", "tosh", "blighter", "bounder",
+        "rotter", "rascal", "scallywag", "scamp",
+        "jerkoff", "dildo", "fartknocker", "jackhole", "knobend",
+        "bollock", "mong", "nonce", "poof", "slag",
+        "bint", "gitface", "toerag", "twitface", "poophead",
+        "scrub", "chode", "queef", "schmuck", "schlong",
+        "dweeb", "gimp", "nimrod", "wuss", "ponce",
+        "scrub", "smeg", "craptastic", "booger", "twunt",
+        "slutbag", "shitstain", "asshat", "fucktard", "douchecanoe",
+        "numbnuts", "shitgibbon", "wankpuffin", "fucknugget", "twatface",
+        "gobshite", "pisshead", "shatner", "fuckwit", "clotpole",
+        "arsewipe", "knobgobbler", "twatwaddle", "shitweasel", "wazzock",
+        "cockwomble", "fuckwit", "numpty", "pillock", "muppet",
+        "dingbat", "dipstick", "tosspot", "scrote", "spanner",
+        "numskull", "arsetronaut", "fucker", "fuckhead", "shitferbrains",
+        "fucko", "dipshit", "jizzface", "fuckhole", "cumbucket",
+        "fuckballs", "shitbird", "twattybollocks", "fuckknuckle", "fucktard",
+        "fucknozzle", "shitbrain", "fuckbrain", "fuckhead", "fuckface",
+        "fuckwit", "fuckass", "shitstick", "fuckrag", "shitsack",
+        "asspickle", "fuckbucket", "assclown", "fuckwad", "fuckmuppet",
+        "dickwad", "shitbird", "assbiscuit", "fuckstick", "fucktrophy",
+        "shitnugget", "fuckstain", "fuckface", "fuckhat", "shitnugget",
+        "fucktoy", "fucktrain", "shitbreath", "fuckwaffle", "shitwaffle",
+        "fuckbreath", "shitfuck", "shitface", "fuckbiscuit", "shitgoblin",
+        "fuckgoblin", "fuckpuddle", "shitchute", "fucktrumpet", "fuckmonkey",
+        "fucknuts", "fuckpuddle", "fuckstain", "shitwaffle", "fuckwit",
+        "shitlord", "fucklord", "fucktard", "fuckmonkey", "shitstain",
+        "fucktart", "fuckboy", "shitstain", "fuckhead", "fucknoodle",
+        "shitstick", "fuckspoon", "fuckball", "fuckwaffle", "shitbreath",
+        "shitbag", "fuckface", "shitlicker", "fuckface", "fucktoaster",
+        "shitwaffle", "douchefag", "shitcunt", "fucknugget", "asswad",
+        "fuckmuffin", "fuckwrench", "dicknose", "shitbutt", "fuckballs",
+        "shitfucker", "fuckdouche", "dickface", "shitcocks", "fuckbutt",
+        "shitball", "fuckdouche", "dickbutt", "shitpuddle", "fucknose"
+    ];
+
+    let usedSwearWords = [];
+    let score = 0;
+    let timer;
+    let timeLeft = 10;
+    let idleTime = 0;
+    const idleThreshold = 5; // Time in seconds before showing the message
+
+    function startGame() {
+        timeLeft = 10;
+        document.getElementById('timer').textContent = timeLeft;
+        document.getElementById('message').textContent = '';
+        timer = setInterval(updateTimer, 1000);
+        document.getElementById('swearInput').disabled = false;
+    }
+
+    function updateTimer() {
+        timeLeft--;
+        document.getElementById('timer').textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            document.getElementById('message').textContent = 'Time\'s up! You lose!';
+            document.getElementById('swearInput').disabled = true;
+        }
+    }
+
+    function resetGame() {
+        clearInterval(timer);
+        usedSwearWords = [];
+        score = 0;
+        document.getElementById('score').textContent = score;
+        document.getElementById('message').textContent = '';
+        document.getElementById('swearInput').disabled = false;
+        startGame();
+    }
+
+    function showIdleMessage() {
+        document.getElementById('message').textContent = 'Type in a swear word!';
+    }
+
+    function hideIdleMessage() {
+        document.getElementById('message').textContent = '';
+        idleTime = 0;
+    }
+
+    document.getElementById('swearInput').addEventListener('input', () => {
+        hideIdleMessage();
+        idleTime = 0; // Reset idle time on user input
+    });
+
+    document.getElementById('swearInput').addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            let swearWord = event.target.value.trim().toLowerCase();
+
+            if (commonSwearWords.includes(swearWord) && !usedSwearWords.includes(swearWord)) {
+                usedSwearWords.push(swearWord);
+                score++;
+                document.getElementById('score').textContent = score;
+                event.target.value = '';
+                timeLeft = 10; // Reset timer
+                document.getElementById('timer').textContent = timeLeft;
+            } else {
+                document.getElementById('message').textContent = 'Invalid or repeated word! You lose!';
+                document.getElementById('swearInput').disabled = true;
+                clearInterval(timer);
+            }
+        }
+    });
+
+    // Periodically check for idle time
+    setInterval(() => {
+        idleTime++;
+        if (idleTime >= idleThreshold) {
+            showIdleMessage();
+        }
+    }, 1000);
+
+    // Populate the swear words list
+    const swearList = document.getElementById('swearList');
+    commonSwearWords.forEach(word => {
+        const listItem = document.createElement('li');
+        listItem.textContent = word;
+        swearList.appendChild(listItem);
+    });
+
+    // Start the game
+    startGame();
+</script>
+
+</body>
+</html>
+
+
+
